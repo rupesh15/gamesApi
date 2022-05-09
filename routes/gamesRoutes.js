@@ -19,4 +19,4 @@ router
   .post(gamesRoutes.updateGames)
   .delete(gamesRoutes.deleteGames);
 
-module.exports = router;
+module.exports =  router;
