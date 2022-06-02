@@ -1,6 +1,28 @@
 const req = require('express/lib/request');
 const Games = require('../model/gamesModel');
 const APIFeatures = require('./../utils/apiFeatures');
+const multer = require('multer');
+const AppError = require('../utils/appError')
+const sharp = require('sharp')
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  console.log('inside multer filter ', file.mimetype)
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload =  multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+})
+
+console.log('value is ',upload.single('photo'))
+exports.uploadUserPhoto = upload.single('photo');
 
 exports.aliasTopGames = (req, res, next) => {
   req.query.limit = '5';
@@ -8,6 +30,7 @@ exports.aliasTopGames = (req, res, next) => {
   req.query.fields = 'name,type,price,rating';
   next();
 };
+
 
 exports.getAllGames = async (req, res) => {
   try {
@@ -90,12 +113,35 @@ exports.CreateGames = async (req, res) => {
   }
 };
 
+exports.resizeUserPhoto = async (req, res, next) => {
+  console.log('req body is', req.body)
+  if (!req.file) return next();
+  console.log('req value is', req)
+
+  req.file.filename = `user-${Date.now()}.jpeg`;
+  console.log('req.file.buffer',req.file.buffer)
+
+  // await sharp(req.file.buffer)
+  //   .resize(500, 500)
+  //   .toFormat('jpeg')
+  //   .jpeg({ quality: 90 })
+  //   .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
+
+// const filteredBody = filterObj(res.body,'name' )
+
 exports.updateGames = async (req, res) => {
+  console.log('req updated games is', req.file, 'req.body is', req.body);
+  if (req.file) req.body.photo = req.file.filename
+  
   try {
     const games = await Games.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });
+    console.log('inside update games', req.body)
     res.status(200).json({
       status: 'successfull',
       data: games

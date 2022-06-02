@@ -40,6 +40,9 @@ const gamesSchema = new mongoose.Schema({
     currenttime: {
       type: Date,
       default: Date.now()
+    },
+    photo: {
+      type: String,
     }
   });
 

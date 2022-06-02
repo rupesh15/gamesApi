@@ -16,7 +16,7 @@ router
 router
   .route('/:id')
   .get(gamesRoutes.getGamesByType)
-  .post(gamesRoutes.updateGames)
+  .post(gamesRoutes.uploadUserPhoto,gamesRoutes.resizeUserPhoto,gamesRoutes.updateGames)
   .delete(gamesRoutes.deleteGames);
 
 module.exports = router;
